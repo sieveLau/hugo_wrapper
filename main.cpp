@@ -4,6 +4,9 @@
 #include <fmt/core.h>
 #include <filesystem>
 #include <list>
+#include <fstream>
+#include <nlohmann/json.hpp>
+#include <path_helper.h>
 #define COMMAND_NOT_FOUND (-1)
 
 bool command_exist(const std::string& command){
@@ -30,32 +33,28 @@ void ask_and_get_answer(const std::string& print_str, T& user_input){
     std::cin>>user_input;
 }
 
-int main() {
+
+int main(int argc, char** argv) {
     using std::string;
     using std::cout;
     const static std::string kCommand = "hugo";
-//    auto command_exist = fmt::format("which {} > /dev/null 2>&1", kCommand.c_str());
     if (!command_exist(kCommand)) {
-        fmt::print("failed, no command");
+        std::cerr<<"failed, no command";
         exit(COMMAND_NOT_FOUND);
     }
-//        fmt::print("good");
 
+    // 读取配置文件，与可执行文件同目录的config.json
+    using json = nlohmann::json;
+    std::ifstream f(exec_dir(argv[0])+"/config.json");
+    json config = json::parse(f);
 
     int option;
-//    cout<<init_option_str();
-//
-////    cout<<"option:\n1: new post\n2. generate\n3. server\n4. clean";
-//    std::cin>>option;
-
     ask_and_get_answer(init_option_str(),option);
     switch (option) {
         case 1: {
             string post_title;
-//            cout << "title: ";
-//            std::cin >> post_title;
             ask_and_get_answer("title: ",post_title);
-            auto command = fmt::format("{} new post/{}", kCommand, post_title);
+            auto command = fmt::format("{} new {}/'{}'.md", kCommand, config["post_dir"],post_title);
             system(command.c_str());
             break;
         }
@@ -83,7 +82,6 @@ int main() {
                 default:
                     break;
             }
-            break;
         }
         default:
             break;
