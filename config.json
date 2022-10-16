@@ -1,5 +1,4 @@
 {
-  "hugo_exe": "/opt/local/bin/hugo",
   "post_dir": "post",
   "options": [
     {
